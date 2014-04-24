@@ -1,0 +1,22 @@
+{
+  "name": "observable-util",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/youngjay/observable-util.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/youngjay/observable-util/issues"
+  },
+  "homepage": "https://github.com/youngjay/observable-util",
+  "dependencies": {
+    "knockout": "^3.1.0"
+  }
+}
