@@ -1,6 +1,4 @@
 var ko = require('knockout');
-var ob = ko.observable;
-var oba = ko.observableArray;
 var peekObservable = ko.utils.peekObservable;
 
 var forEach = function(o, fn) {
@@ -8,7 +6,6 @@ var forEach = function(o, fn) {
         fn(o[key], key);
     })
 };
-
 
 var isWriteable = function(ob, key) {
     if (!ko.isWriteableObservable(ob)) {
@@ -51,17 +48,17 @@ var getData = function(model) {
 module.exports = {
     getData: getData,
     setData: setData,
-    observable: function(props, model) {
+    observable: function(model, props) {
         forEach(props, function(value, key) {
             model[key] = ko.observable(value);
         });
     },
-    observableArray: function(props, model) {
+    observableArray: function(model, props) {
         forEach(props, function(value, key) {
             model[key] = ko.observableArray(value);
         });
     },
-    computed: function(props, model) {
+    computed: function(model, props) {
         forEach(props, function(value, key) {
             model[key] = ko.computed(value, model);
         });
