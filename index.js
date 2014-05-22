@@ -1,11 +1,6 @@
 var ko = require('knockout');
+var _ = require('lodash');
 var peekObservable = ko.utils.peekObservable;
-
-var forEach = function(o, fn) {
-    Object.keys(o).forEach(function(key) {
-        fn(o[key], key);
-    })
-};
 
 var isWriteable = function(ob, key) {
     if (!ko.isWriteableObservable(ob)) {
@@ -21,7 +16,7 @@ var isWriteable = function(ob, key) {
 
 var getDataPropertyNames = function(model) {
     var names = [];
-    forEach(model, function(o, key) {
+    _.forEach(model, function(o, key) {
         if (isWriteable(o, key)) {
             names.push(key);
         }
@@ -30,7 +25,7 @@ var getDataPropertyNames = function(model) {
 };
 
 var setData = function(model, o) {
-    forEach(o, function(value, key) {
+    _.forEach(o, function(value, key) {
         var ob = model[key];
         if (isWriteable(ob, key)) {
             ob(value);
@@ -45,21 +40,35 @@ var getData = function(model) {
     }, {});
 };
 
+var fromJS = function(o) {
+    if (_.isArray(o)) {
+        return ko.observableArray(o.map(fromJS));
+    }
+    if (_.isPlainObject(o)) {
+        return _.reduce(o, function(ret, value, key) {
+            ret[key] = fromJS(value);
+            return ret;
+        }, {});
+    }
+    return ko.observable(o);
+};
+
 module.exports = {
     getData: getData,
     setData: setData,
+    fromJS: fromJS,
     observable: function(model, props) {
-        forEach(props, function(value, key) {
+        _.forEach(props, function(value, key) {
             model[key] = ko.observable(value);
         });
     },
     observableArray: function(model, props) {
-        forEach(props, function(value, key) {
+        _.forEach(props, function(value, key) {
             model[key] = ko.observableArray(value);
         });
     },
     computed: function(model, props) {
-        forEach(props, function(value, key) {
+        _.forEach(props, function(value, key) {
             model[key] = ko.computed(value, model);
         });
     }
