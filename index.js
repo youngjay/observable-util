@@ -1,6 +1,8 @@
 var ko = require('knockout');
-var _ = require('lodash');
 var peekObservable = ko.utils.peekObservable;
+var oba = ko.observableArray;
+var ob = ko.observable;
+var _ = require('lodash');
 
 var isWriteable = function(ob, key) {
     if (!ko.isWriteableObservable(ob)) {
@@ -24,13 +26,22 @@ var getDataPropertyNames = function(model) {
     return names;
 };
 
-var setData = function(model, o) {
+var setData = function(model, o, manual) {
     _.forEach(o, function(value, key) {
-        var ob = model[key];
-        if (isWriteable(ob, key)) {
-            ob(value);
+        if (manual && (key in manual)) {
+            manual[key].call(model, value);
+        }
+        else {
+            var ob = model[key];
+            if (isWriteable(ob, key)) {
+                ob(cloneIfIsArray(value));
+            }
         }
     })
+};
+
+var cloneIfIsArray = function(value) {
+    return _.isArray(value) ? value.slice() : value;
 };
 
 var getData = function(model) {
@@ -40,31 +51,26 @@ var getData = function(model) {
     }, {});
 };
 
-var fromJS = function(o) {
-    if (_.isArray(o)) {
-        return ko.observableArray(o.map(fromJS));
-    }
-    if (_.isPlainObject(o)) {
-        return _.reduce(o, function(ret, value, key) {
-            ret[key] = fromJS(value);
-            return ret;
-        }, {});
-    }
-    return ko.observable(o);
-};
+// var fromJS = function(o) {
+//     if (_.isArray(o)) {
+//         return oba(o.map(fromJS));
+//     }
+//     if (_.isPlainObject(o)) {
+//         return _.reduce(o, function(ret, value, key) {
+//             ret[key] = fromJS(value);
+//             return ret;
+//         }, {});
+//     }
+//     return ob(o);
+// };
 
 module.exports = {
     getData: getData,
     setData: setData,
-    fromJS: fromJS,
+    // fromJS: fromJS,
     observable: function(model, props) {
         _.forEach(props, function(value, key) {
-            model[key] = ko.observable(value);
-        });
-    },
-    observableArray: function(model, props) {
-        _.forEach(props, function(value, key) {
-            model[key] = ko.observableArray(value);
+            model[key] = (_.isArray(value) ? oba : ob)(cloneIfIsArray(value));
         });
     },
     computed: function(model, props) {
